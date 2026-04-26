@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CySA+ CS0-003 Local Exam Prep App</title>
+  <style>
+    :root{--bg:#0b1020;--panel:#111936;--panel2:#172246;--text:#eef3ff;--muted:#aeb9d6;--accent:#7dd3fc;--good:#34d399;--bad:#fb7185;--warn:#fbbf24;--border:#26345f;}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(120deg,#08111f,#10172f 40%,#07121f);color:var(--text)}
+    header{padding:26px 20px;border-bottom:1px solid var(--border);background:rgba(12,18,38,.9);position:sticky;top:0;z-index:2;backdrop-filter:blur(10px)}
+    h1{margin:0;font-size:clamp(24px,4vw,42px)} .sub{color:var(--muted);margin-top:6px;line-height:1.4}.wrap{display:grid;grid-template-columns:320px 1fr;gap:18px;padding:18px;max-width:1400px;margin:auto}
+    aside,.card{background:rgba(17,25,54,.92);border:1px solid var(--border);border-radius:20px;box-shadow:0 12px 34px rgba(0,0,0,.25)} aside{padding:16px;height:max-content;position:sticky;top:118px}.card{padding:18px;margin-bottom:18px}
+    button,select,input{border:1px solid var(--border);background:#0e1732;color:var(--text);border-radius:12px;padding:11px 12px;font-size:14px}button{cursor:pointer;font-weight:700}button:hover{border-color:var(--accent)}.primary{background:linear-gradient(135deg,#0ea5e9,#2563eb);border:0}.danger{background:#3b1220;border-color:#7f1d1d}.success{background:#113725;border-color:#065f46}.warn{background:#33270a;border-color:#92400e}.row{display:flex;gap:10px;flex-wrap:wrap}.grid{display:grid;gap:12px}.two{grid-template-columns:repeat(2,minmax(0,1fr))}.three{grid-template-columns:repeat(3,minmax(0,1fr))}.full{width:100%}label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}.metric{padding:12px;background:rgba(10,17,36,.8);border:1px solid var(--border);border-radius:16px}.metric b{display:block;font-size:23px}.small{font-size:12px;color:var(--muted)}.question{font-size:22px;line-height:1.35;margin:10px 0 18px}.option{width:100%;text-align:left;margin:8px 0;padding:14px;border-radius:14px;background:#0c1530}.option.correct{border-color:var(--good);background:rgba(52,211,153,.12)}.option.wrong{border-color:var(--bad);background:rgba(251,113,133,.13)}.explain{border-left:4px solid var(--accent);padding:12px;background:#0b1430;border-radius:12px;margin-top:14px;white-space:pre-line}.pill{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:999px;padding:6px 10px;margin:3px;background:#0d1731;color:var(--muted);font-size:12px}.progress{height:12px;background:#0a1024;border-radius:999px;overflow:hidden;border:1px solid var(--border)}.bar{height:100%;background:linear-gradient(90deg,#22c55e,#0ea5e9);width:0}.hidden{display:none!important}.list{max-height:420px;overflow:auto}.qitem{padding:10px;border-bottom:1px solid var(--border);cursor:pointer}.qitem:hover{background:#0b1430}.footer{color:var(--muted);font-size:12px;text-align:center;padding:20px}.tag{color:var(--accent)} textarea{width:100%;height:120px;background:#0e1732;color:var(--text);border:1px solid var(--border);border-radius:12px;padding:10px}
+    @media(max-width:900px){.wrap{grid-template-columns:1fr}aside{position:static}.two,.three{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<header>
+  <h1>CySA+ CS0-003 Local Exam Prep App</h1>
+  <div class="sub">1000+ built-in practice Q&A generated from objective-aligned concepts. Runs locally in any modern browser. Progress saves in this browser only.</div>
+</header>
+<div class="wrap">
+  <aside>
+    <div class="grid">
+      <button class="primary full" onclick="startPractice()">Start Practice</button>
+      <button class="full" onclick="startExam()">Start 85-Question Exam Mode</button>
+      <button class="full" onclick="showFlashcards()">Flashcard Mode</button>
+      <button class="full" onclick="showReview()">Review All Questions</button>
+      <div>
+        <label>Domain filter</label>
+        <select id="domain" class="full" onchange="refreshCounts()"><option value="all">All domains</option></select>
+      </div>
+      <div>
+        <label>Search questions</label>
+        <input id="search" class="full" placeholder="SIEM, XSS, CVSS, playbook..." oninput="refreshCounts()" />
+      </div>
+      <div class="three">
+        <div class="metric"><b id="totalQ">0</b><span class="small">Questions</span></div>
+        <div class="metric"><b id="scoreBox">0%</b><span class="small">Score</span></div>
+        <div class="metric"><b id="seenBox">0</b><span class="small">Answered</span></div>
+      </div>
+      <div class="progress"><div id="progressBar" class="bar"></div></div>
+      <button class="success full" onclick="exportProgress()">Export Progress</button>
+      <button class="warn full" onclick="document.getElementById('importBox').classList.toggle('hidden')">Import Progress</button>
+      <div id="importBox" class="hidden"><textarea id="importText" placeholder="Paste exported progress JSON here"></textarea><button class="full" onclick="importProgress()">Import</button></div>
+      <button class="danger full" onclick="resetProgress()">Reset Progress</button>
+      <p class="small">Study tip: practice by domain first, then use Exam Mode. This app is educational and not affiliated with CompTIA.</p>
+    </div>
+  </aside>
+  <main>
+    <section id="home" class="card">
+      <h2>How to use this app</h2>
+      <p>Use <b>Start Practice</b> for immediate feedback, <b>Exam Mode</b> for 85 timed-style questions, <b>Flashcard Mode</b> for quick review, or <b>Review All Questions</b> to browse the full bank.</p>
+      <div class="row" id="domainPills"></div>
+      <div class="card" style="background:#0b1430"><b>Built for local use:</b> save this file anywhere, double-click it, and it opens in your browser. No internet, login, or database needed.</div>
+    </section>
+    <section id="quiz" class="card hidden"></section>
+    <section id="review" class="card hidden"></section>
+  </main>
+</div>
+<div class="footer">CySA+ local study app • question bank generated from CS0-003 topic concepts • browser localStorage enabled</div>
+<script>
+const DOMAINS = [
+  ['Security Operations',33], ['Vulnerability Management',30], ['Incident Response and Management',20], ['Reporting and Communication',17]
+];
+const concepts = [
+['Security Operations','SIEM correlation','Correlate events from multiple sources to detect patterns that single alerts miss.','log source','alert tuning','dashboard'],
+['Security Operations','log ingestion','Collecting logs from endpoints, servers, cloud, identity, and network devices into a central platform.','syslog','agent','normalization'],
+['Security Operations','normalization','Converting logs from different formats into a consistent schema for searching and correlation.','field mapping','parser','timestamp'],
+['Security Operations','baseline','A normal pattern of activity used to detect anomalies.','normal traffic','seasonality','user behavior'],
+['Security Operations','UEBA','User and Entity Behavior Analytics that detects abnormal behavior compared with a baseline.','impossible travel','privilege abuse','anomaly'],
+['Security Operations','IDS alert','A detection that indicates suspicious traffic or behavior; it usually needs analyst validation.','signature','network sensor','false positive'],
+['Security Operations','IPS','An inline prevention tool that can block malicious traffic.','inline','blocking','signature'],
+['Security Operations','EDR','Endpoint Detection and Response for host telemetry, process analysis, and containment.','process tree','isolate host','telemetry'],
+['Security Operations','XDR','Extended Detection and Response that combines telemetry across multiple control planes.','endpoint','network','cloud'],
+['Security Operations','packet capture','A record of network packets used to investigate traffic details.','pcap','Wireshark','protocol analysis'],
+['Security Operations','NetFlow','Metadata about network conversations such as source, destination, ports, protocol, and bytes.','flow data','traffic pattern','metadata'],
+['Security Operations','DNS tunneling','Using DNS queries/responses to hide command-and-control or exfiltration traffic.','long subdomains','TXT records','beaconing'],
+['Security Operations','beaconing','Regular outbound callbacks that may indicate malware command-and-control.','periodic traffic','C2','jitter'],
+['Security Operations','data exfiltration','Unauthorized transfer of data out of an environment.','large outbound upload','cloud storage','DNS'],
+['Security Operations','impossible travel','A login anomaly where a user appears to authenticate from distant locations too quickly.','identity alert','MFA','geo-velocity'],
+['Security Operations','MFA fatigue','Repeated push notifications used to trick a user into approving access.','push bombing','social engineering','identity'],
+['Security Operations','phishing header analysis','Reviewing email headers to validate sender path, SPF, DKIM, DMARC, and relay details.','SPF','DKIM','DMARC'],
+['Security Operations','SPF','Email control that specifies which mail servers may send for a domain.','DNS TXT','sender validation','mail server'],
+['Security Operations','DKIM','Email control that digitally signs messages so recipients can verify integrity and domain ownership.','signature','public key','mail integrity'],
+['Security Operations','DMARC','Email policy that tells receivers what to do when SPF or DKIM checks fail.','quarantine','reject','reporting'],
+['Security Operations','threat intelligence','Evidence-based information about threats, indicators, tactics, and recommended actions.','IOC','TTP','confidence'],
+['Security Operations','IOC','Indicator of Compromise such as malicious IP, domain, hash, URL, or filename.','hash','IP','domain'],
+['Security Operations','TTP','Tactics, Techniques, and Procedures describing how adversaries operate.','MITRE ATT&CK','behavior','tradecraft'],
+['Security Operations','threat hunting','Proactive search for threats that bypassed automated detection.','hypothesis','baseline','telemetry'],
+['Security Operations','YARA','Rule language commonly used to identify malware patterns in files.','malware','strings','condition'],
+['Security Operations','Sigma','Generic SIEM rule format used to describe log-based detections.','portable rule','log detection','SIEM'],
+['Security Operations','STIX/TAXII','Structured threat intelligence format and transport mechanism.','sharing','intel feed','structured data'],
+['Security Operations','sandboxing','Executing suspicious files in an isolated environment to observe behavior.','detonation','malware analysis','isolation'],
+['Security Operations','allowlist','A security control that permits only approved applications, users, or traffic.','application control','least privilege','approved'],
+['Security Operations','denylist','A control that blocks known-bad items such as IPs, hashes, domains, or applications.','known bad','block list','IOC'],
+['Security Operations','least privilege','Giving users and services only the permissions needed for their role.','RBAC','access control','privilege'],
+['Security Operations','segmentation','Separating networks or systems to reduce attack spread and limit access.','VLAN','firewall rule','blast radius'],
+['Security Operations','SOAR','Security Orchestration, Automation, and Response that automates repeatable analyst workflows.','playbook','automation','case management'],
+['Security Operations','single pane of glass','Centralized view that helps analysts monitor tools, alerts, and metrics in one place.','dashboard','visibility','integration'],
+['Security Operations','PowerShell logging','Telemetry useful for detecting suspicious scripts, encoded commands, and living-off-the-land activity.','script block','command line','event logs'],
+['Security Operations','Linux auth logs','Logs that can show SSH login attempts, sudo use, and authentication failures.','/var/log/auth.log','SSH','sudo'],
+['Security Operations','cloud trail logs','Cloud audit logs that record API calls and account activity.','API call','identity','cloud audit'],
+['Security Operations','DLP','Data Loss Prevention controls that detect or block sensitive data movement.','PII','classification','exfiltration'],
+['Security Operations','CASB','Cloud Access Security Broker used to monitor and control cloud application use.','SaaS','shadow IT','policy'],
+['Security Operations','WAF','Web Application Firewall that helps detect or block web attacks like SQL injection and XSS.','HTTP','OWASP','web app'],
+['Security Operations','honeytoken','A fake credential, file, or object placed to trigger alerts when accessed.','deception','early warning','canary'],
+['Security Operations','false positive','An alert that incorrectly identifies benign activity as malicious.','tuning','validation','noise'],
+['Security Operations','false negative','A missed malicious event that was not detected by a control.','detection gap','risk','missed alert'],
+['Security Operations','sensitive data protection','Controls that protect regulated or confidential data from exposure.','encryption','tokenization','DLP'],
+['Vulnerability Management','asset discovery','Identifying systems, services, software, cloud assets, and owners before scanning.','inventory','CMDB','scope'],
+['Vulnerability Management','credentialed scan','A scan that uses valid credentials to inspect installed software and configuration details.','authenticated','more accurate','patch validation'],
+['Vulnerability Management','non-credentialed scan','A scan from the outside perspective that sees only exposed services and banners.','unauthenticated','limited visibility','external view'],
+['Vulnerability Management','active scan','A scan that probes systems directly and may create network traffic or service impact.','probe','Nmap','risk'],
+['Vulnerability Management','passive scan','Monitoring traffic or telemetry to identify assets and vulnerabilities without probing.','low impact','network observation','discovery'],
+['Vulnerability Management','internal scan','Assessment performed from inside the network to find internal exposure and lateral movement risk.','inside network','east-west','internal assets'],
+['Vulnerability Management','external scan','Assessment of internet-facing systems from an outside perspective.','public IP','perimeter','attack surface'],
+['Vulnerability Management','agent-based scanning','Assessment using software installed on endpoints to report vulnerabilities.','endpoint agent','offline systems','local detail'],
+['Vulnerability Management','agentless scanning','Assessment performed remotely without installing endpoint software.','network scan','remote checks','coverage'],
+['Vulnerability Management','SAST','Static Application Security Testing that analyzes code without running it.','source code','early SDLC','static'],
+['Vulnerability Management','DAST','Dynamic Application Security Testing that tests a running application.','runtime','web app','black box'],
+['Vulnerability Management','SCA','Software Composition Analysis that identifies vulnerable third-party libraries and licenses.','dependencies','SBOM','libraries'],
+['Vulnerability Management','container scan','Assessment of container images for vulnerable packages, secrets, or misconfiguration.','image','Trivy','registry'],
+['Vulnerability Management','IaC scan','Scanning infrastructure-as-code templates for insecure configuration before deployment.','Terraform','CloudFormation','shift left'],
+['Vulnerability Management','CVSS','Common Vulnerability Scoring System used to rate technical severity.','base score','temporal','environmental'],
+['Vulnerability Management','EPSS','Exploit Prediction Scoring System estimating likelihood of exploitation in the wild.','exploit likelihood','prioritization','risk'],
+['Vulnerability Management','CVE','Common Vulnerabilities and Exposures identifier for a known vulnerability.','identifier','known flaw','database'],
+['Vulnerability Management','CWE','Common Weakness Enumeration category describing software weakness types.','weakness','pattern','secure coding'],
+['Vulnerability Management','KEV catalog','Known Exploited Vulnerabilities list useful for prioritizing actively exploited issues.','exploitation','CISA','priority'],
+['Vulnerability Management','risk-based prioritization','Ranking remediation by severity, exploitability, exposure, asset value, and business impact.','asset criticality','internet-facing','threat intel'],
+['Vulnerability Management','vulnerability validation','Confirming whether a reported vulnerability is real and exploitable in context.','false positive','proof','evidence'],
+['Vulnerability Management','compensating control','Alternative safeguard used when the primary fix cannot be implemented immediately.','mitigation','temporary','risk reduction'],
+['Vulnerability Management','patch management','Process for testing, approving, deploying, and verifying security updates.','maintenance window','rollback','SLO'],
+['Vulnerability Management','configuration management','Maintaining secure and consistent system settings.','baseline','hardening','drift'],
+['Vulnerability Management','exception process','Documented approval to defer remediation with risk acceptance and expiration.','risk acceptance','owner','expiration'],
+['Vulnerability Management','maintenance window','Approved time period to make changes while reducing business disruption.','change control','downtime','patching'],
+['Vulnerability Management','SLO','Service Level Objective defining target time or performance level for remediation or service delivery.','remediation target','metric','agreement'],
+['Vulnerability Management','secure SDLC','Integrating security throughout software development from design to deployment.','shift left','testing','threat modeling'],
+['Vulnerability Management','threat modeling','Identifying threats, attack paths, and mitigations during design.','STRIDE','architecture','design review'],
+['Vulnerability Management','SQL injection','Injection attack where untrusted input changes database queries.','parameterized queries','input validation','database'],
+['Vulnerability Management','XSS','Cross-site scripting where attacker-supplied script executes in a user browser.','output encoding','input validation','CSP'],
+['Vulnerability Management','buffer overflow','Memory corruption where input exceeds allocated buffer boundaries.','memory safety','bounds checking','exploit'],
+['Vulnerability Management','insecure deserialization','Unsafe processing of serialized objects that can lead to code execution or tampering.','object','RCE','validation'],
+['Vulnerability Management','SSRF','Server-Side Request Forgery where a server is tricked into making unauthorized requests.','metadata service','internal resource','URL validation'],
+['Vulnerability Management','CSRF','Attack that forces a logged-in user browser to submit unwanted requests.','anti-CSRF token','same-site cookie','state change'],
+['Vulnerability Management','directory traversal','Using path manipulation to access files outside the intended directory.','../','file access','input validation'],
+['Vulnerability Management','default credentials','Factory or unchanged credentials that attackers can guess or find publicly.','password change','hardening','device'],
+['Vulnerability Management','misconfiguration','Insecure setting such as public storage, weak permissions, or unnecessary service exposure.','hardening','baseline','cloud bucket'],
+['Vulnerability Management','zero day','A vulnerability unknown to the vendor or without an available patch.','unknown flaw','compensating control','threat intel'],
+['Vulnerability Management','end-of-life software','Unsupported software that no longer receives security patches.','upgrade','migration','risk'],
+['Vulnerability Management','remediation verification','Confirming that a fix actually resolved the vulnerability.','rescan','evidence','closure'],
+['Incident Response and Management','incident response plan','Documented plan defining roles, communications, severity, and response steps for incidents.','IR plan','roles','procedure'],
+['Incident Response and Management','preparation','IR phase focused on people, tools, training, playbooks, and access before incidents happen.','readiness','playbook','training'],
+['Incident Response and Management','detection and analysis','IR phase where alerts are triaged, scope is determined, and evidence is reviewed.','triage','scope','evidence'],
+['Incident Response and Management','containment','IR phase that limits damage and prevents spread.','isolate host','block IOC','disable account'],
+['Incident Response and Management','eradication','IR phase that removes malware, closes persistence, and eliminates root cause.','remove threat','patch','persistence'],
+['Incident Response and Management','recovery','IR phase that restores systems safely and monitors for recurrence.','restore service','monitor','validate'],
+['Incident Response and Management','lessons learned','Post-incident review to improve controls, processes, and training.','after-action','metrics','improvement'],
+['Incident Response and Management','chain of custody','Documentation showing who collected, handled, transferred, and stored evidence.','forensics','evidence','integrity'],
+['Incident Response and Management','forensic image','Bit-for-bit copy of a storage device used for analysis while preserving original evidence.','hash','write blocker','evidence'],
+['Incident Response and Management','volatile data','Temporary data like memory, processes, sessions, and network connections that can disappear quickly.','RAM','processes','order of volatility'],
+['Incident Response and Management','order of volatility','Priority for collecting evidence from most volatile to least volatile.','RAM first','network sessions','disk later'],
+['Incident Response and Management','root cause analysis','Determining the underlying reason an incident occurred.','cause','fix','prevent recurrence'],
+['Incident Response and Management','MITRE ATT&CK','Knowledge base of adversary tactics and techniques used for detection, hunting, and mapping behavior.','tactics','techniques','matrix'],
+['Incident Response and Management','Cyber Kill Chain','Framework describing stages such as reconnaissance, weaponization, delivery, exploitation, installation, C2, and actions.','Lockheed Martin','attack stages','C2'],
+['Incident Response and Management','Diamond Model','Intrusion analysis model linking adversary, infrastructure, capability, and victim.','adversary','infrastructure','victim'],
+['Incident Response and Management','OSSTMM','Security testing methodology focused on operational security testing.','methodology','testing','controls'],
+['Incident Response and Management','OWASP testing guide','Guide for testing web application security issues.','web apps','testing','OWASP'],
+['Incident Response and Management','playbook','Step-by-step response workflow for a specific incident type.','phishing','ransomware','repeatable'],
+['Incident Response and Management','runbook','Operational procedure for a routine technical task.','standard procedure','operations','repeatable'],
+['Incident Response and Management','tabletop exercise','Discussion-based exercise that tests incident response decisions without touching production systems.','scenario','training','readiness'],
+['Incident Response and Management','business continuity','Keeping critical business functions operating during disruption.','BCP','critical functions','resilience'],
+['Incident Response and Management','disaster recovery','Restoring technology systems and data after a major disruption.','RTO','RPO','backup'],
+['Incident Response and Management','RTO','Recovery Time Objective: maximum acceptable time to restore a service.','time','restore','availability'],
+['Incident Response and Management','RPO','Recovery Point Objective: maximum acceptable data loss measured in time.','data loss','backup frequency','restore point'],
+['Incident Response and Management','ransomware response','Contain affected systems, preserve evidence, identify scope, restore from clean backups, and communicate.','encryption','backup','containment'],
+['Incident Response and Management','credential compromise','Incident where credentials are exposed or abused; response includes reset, revoke sessions, MFA, and log review.','account takeover','token revocation','MFA'],
+['Incident Response and Management','malware triage','Initial analysis of suspicious file or host activity to determine severity and next steps.','hash','sandbox','process tree'],
+['Incident Response and Management','evidence preservation','Protecting logs, images, and artifacts from alteration or loss.','hashing','retention','legal hold'],
+['Incident Response and Management','incident declaration','Formal decision that an event meets the criteria to become an incident.','severity','escalation','response'],
+['Incident Response and Management','severity classification','Assigning priority based on scope, impact, sensitivity, and urgency.','criticality','impact','priority'],
+['Incident Response and Management','containment strategy','Decision between short-term containment and long-term containment based on business and evidence needs.','isolation','segmentation','risk'],
+['Reporting and Communication','executive summary','Concise business-focused summary of risk, impact, and recommended action.','nontechnical','business impact','decision'],
+['Reporting and Communication','technical report','Detailed report with evidence, affected systems, reproduction steps, and remediation guidance.','evidence','technical detail','remediation'],
+['Reporting and Communication','stakeholder communication','Tailoring communication based on audience needs, urgency, and responsibility.','audience','timing','clarity'],
+['Reporting and Communication','incident escalation','Notifying higher-level teams or leaders based on severity, scope, or policy.','severity','chain','notification'],
+['Reporting and Communication','KPI','Key Performance Indicator used to measure security program performance.','metric','trend','performance'],
+['Reporting and Communication','mean time to detect','Metric measuring average time to identify an incident or threat.','MTTD','detection','metric'],
+['Reporting and Communication','mean time to respond','Metric measuring average time to contain or remediate incidents.','MTTR','response','metric'],
+['Reporting and Communication','vulnerability report','Report listing findings, affected assets, risk ratings, evidence, and remediation recommendations.','findings','assets','remediation'],
+['Reporting and Communication','risk register','Document tracking risks, owners, treatment decisions, and status.','risk owner','status','mitigation'],
+['Reporting and Communication','remediation plan','Action plan that defines fixes, owners, timelines, dependencies, and validation.','owner','deadline','verification'],
+['Reporting and Communication','inhibitors to remediation','Factors that delay fixes such as legacy systems, downtime limits, lack of ownership, or business constraints.','constraints','legacy','ownership'],
+['Reporting and Communication','compliance report','Evidence-based report showing alignment with regulatory or policy requirements.','audit','controls','evidence'],
+['Reporting and Communication','risk acceptance','Formal decision to accept risk, usually with owner approval and expiration.','exception','owner','documented'],
+['Reporting and Communication','lessons learned report','Post-incident report documenting timeline, root cause, impact, and improvements.','timeline','root cause','improvement'],
+['Reporting and Communication','communication plan','Defined who communicates what, when, and through which channels during incidents.','audience','channel','timing'],
+['Reporting and Communication','actionable recommendation','Clear guidance that explains what to do, why it matters, and how to verify completion.','specific','measurable','practical'],
+['Reporting and Communication','evidence-based reporting','Using logs, screenshots, hashes, timestamps, and scan output to support findings.','evidence','timestamp','artifact'],
+['Reporting and Communication','trend analysis','Using metrics over time to identify improvement or worsening conditions.','trend','chart','baseline'],
+['Reporting and Communication','service-level reporting','Showing whether remediation or response met defined time objectives.','SLO','SLA','deadline']
+];
+const stems = [
+  c=>`A SOC analyst is reviewing an alert involving ${c[1]}. What is the BEST interpretation?`,
+  c=>`Which action BEST applies when handling ${c[1]} in a CySA+ scenario?`,
+  c=>`A security team wants to improve ${c[1]}. Which choice is MOST appropriate?`,
+  c=>`During an investigation, evidence points to ${c[1]}. What should the analyst focus on FIRST?`,
+  c=>`Which statement accurately describes ${c[1]}?`,
+  c=>`A report mentions ${c[1]}. What is the key security value?`,
+  c=>`Which artifact or concept is MOST closely related to ${c[1]}?`,
+  c=>`A junior analyst confuses ${c[1]} with another concept. Which explanation is correct?`,
+  c=>`What is a common CySA+ exam clue for ${c[1]}?`
+];
+const distractors = [
+ 'It guarantees that all attacks are prevented automatically.',
+ 'It is mainly used to increase internet bandwidth.',
+ 'It replaces the need for documented incident response procedures.',
+ 'It should be ignored unless a system is already offline.',
+ 'It is only useful after legal action has started.',
+ 'It removes the need for vulnerability prioritization.',
+ 'It is the same as formatting a disk and reinstalling the OS.',
+ 'It proves attribution to a specific nation-state with certainty.',
+ 'It is primarily a physical security control.',
+ 'It should be performed without recording evidence or timestamps.'
+];
+function makeQuestions(){
+ let qs=[]; let id=1;
+ concepts.forEach((c,ci)=>{stems.forEach((fn,si)=>{
+   const correct = si%3===0 ? c[2] : si%3===1 ? `Use ${c[3]}, ${c[4]}, and ${c[5]} as clues while validating context and business risk.` : `${c[1]} is associated with ${c[3]}, ${c[4]}, and ${c[5]}.`;
+   let wrong = distractors.slice((ci+si)%distractors.length).concat(distractors).filter(x=>x!==correct).slice(0,3);
+   let opts = [correct,...wrong].map((t,i)=>({t,correct:i===0}));
+   opts = shuffleDet(opts, ci*31+si*17);
+   qs.push({id:id++,domain:c[0],topic:c[1],question:fn(c),options:opts,answer:correct,explanation:`Correct: ${correct}\nWhy: ${c[2]}\nKeywords: ${c[3]}, ${c[4]}, ${c[5]}.`,marked:false});
+ });});
+ return qs;
+}
+function shuffleDet(arr,seed){let a=[...arr];for(let i=a.length-1;i>0;i--){seed=(seed*9301+49297)%233280;let j=Math.floor((seed/233280)*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+let QUESTIONS = makeQuestions();
+let state = JSON.parse(localStorage.getItem('cysaLocalProgress')||'{"answered":{},"marked":{},"history":[]}');
+let session=[], idx=0, examMode=false, locked=false, flash=false;
+function save(){localStorage.setItem('cysaLocalProgress',JSON.stringify(state)); refreshCounts();}
+function filtered(){const d=document.getElementById('domain').value; const s=document.getElementById('search').value.toLowerCase(); return QUESTIONS.filter(q=>(d==='all'||q.domain===d)&&(!s||(`${q.question} ${q.topic} ${q.explanation}`).toLowerCase().includes(s)));}
+function init(){const sel=document.getElementById('domain'); DOMAINS.forEach(d=>{let o=document.createElement('option');o.value=d[0];o.textContent=`${d[0]} (${d[1]}%)`;sel.appendChild(o);}); document.getElementById('domainPills').innerHTML=DOMAINS.map(d=>`<span class="pill">${d[0]} • ${d[1]}%</span>`).join(''); refreshCounts();}
+function refreshCounts(){let f=filtered();document.getElementById('totalQ').textContent=f.length;let vals=Object.values(state.answered);let right=vals.filter(v=>v.correct).length;document.getElementById('seenBox').textContent=vals.length;document.getElementById('scoreBox').textContent=vals.length?Math.round(right/vals.length*100)+'%':'0%';document.getElementById('progressBar').style.width=Math.min(100,vals.length/QUESTIONS.length*100)+'%';}
+function startPractice(){examMode=false;flash=false;session=shuffleDet(filtered(),Date.now()%100000).slice(0,Math.min(filtered().length,50));idx=0;showQuiz();}
+function startExam(){examMode=true;flash=false;session=weightedExam();idx=0;showQuiz();}
+function weightedExam(){let out=[];DOMAINS.forEach(d=>{let count=Math.round(85*d[1]/100);out=out.concat(shuffleDet(QUESTIONS.filter(q=>q.domain===d[0]),Date.now()%9999).slice(0,count));});return shuffleDet(out.slice(0,85),888);}
+function showQuiz(){hideAll();document.getElementById('quiz').classList.remove('hidden');renderQ();}
+function renderQ(){locked=false;let q=session[idx]; if(!q){return finishSession()} let selected=state.answered[q.id]?.choice; let html=`<div class="row"><span class="pill">${q.domain}</span><span class="pill">${q.topic}</span><span class="pill">Question ${idx+1} of ${session.length}</span>${examMode?'<span class="pill">Exam Mode</span>':''}</div><div class="question">${q.question}</div><div>${q.options.map((o,i)=>`<button class="option" onclick="choose(${i})">${String.fromCharCode(65+i)}. ${o.t}</button>`).join('')}</div><div id="feedback"></div><div class="row" style="margin-top:14px"><button onclick="prevQ()">Back</button><button onclick="nextQ()">Next</button><button onclick="toggleMark(${q.id})">${state.marked[q.id]?'Unmark':'Mark for Review'}</button></div>`;document.getElementById('quiz').innerHTML=html; if(selected!==undefined&&!examMode){choose(selected,true);} }
+function choose(i,replay=false){let q=session[idx]; if(locked && !replay) return; let opt=q.options[i]; state.answered[q.id]={choice:i,correct:!!opt.correct,domain:q.domain,topic:q.topic}; if(!examMode){locked=true;document.querySelectorAll('.option').forEach((b,n)=>{if(q.options[n].correct)b.classList.add('correct'); if(n===i&&!q.options[n].correct)b.classList.add('wrong');});document.getElementById('feedback').innerHTML=`<div class="explain">${q.explanation}</div>`;} save();}
+function nextQ(){idx++; if(idx>=session.length)finishSession(); else renderQ();}
+function prevQ(){if(idx>0){idx--;renderQ();}}
+function finishSession(){let answered=session.filter(q=>state.answered[q.id]);let right=answered.filter(q=>state.answered[q.id].correct).length;document.getElementById('quiz').innerHTML=`<h2>Session Complete</h2><p class="question">Score: ${answered.length?Math.round(right/answered.length*100):0}% (${right}/${answered.length})</p><button class="primary" onclick="startPractice()">New Practice Session</button> <button onclick="showReview()">Review Questions</button>`;}
+function toggleMark(id){state.marked[id]=!state.marked[id];save();renderQ();}
+function showFlashcards(){flash=true;hideAll();let f=filtered();session=shuffleDet(f,Date.now()%99999);idx=0;document.getElementById('quiz').classList.remove('hidden');renderFlash();}
+function renderFlash(){let q=session[idx];document.getElementById('quiz').innerHTML=`<div class="row"><span class="pill">${q.domain}</span><span class="pill">${q.topic}</span><span class="pill">${idx+1}/${session.length}</span></div><div class="question">${q.topic}</div><button class="primary" onclick="document.getElementById('flashAnswer').classList.toggle('hidden')">Show / Hide Answer</button><div id="flashAnswer" class="explain hidden">${q.explanation}</div><div class="row" style="margin-top:14px"><button onclick="idx=Math.max(0,idx-1);renderFlash()">Back</button><button onclick="idx=(idx+1)%session.length;renderFlash()">Next</button></div>`;}
+function showReview(){hideAll();document.getElementById('review').classList.remove('hidden');let f=filtered();document.getElementById('review').innerHTML=`<h2>Review Bank</h2><p>${f.length} questions match your filters.</p><div class="list">${f.map(q=>`<div class="qitem" onclick="session=[QUESTIONS.find(x=>x.id===${q.id})];idx=0;examMode=false;showQuiz()"><b>#${q.id}</b> <span class="tag">${q.domain}</span> — ${q.question}<br><span class="small">Answer: ${q.answer}</span></div>`).join('')}</div>`;}
+function hideAll(){['home','quiz','review'].forEach(id=>document.getElementById(id).classList.add('hidden'));}
+function exportProgress(){prompt('Copy your progress JSON:',JSON.stringify(state));}
+function importProgress(){try{state=JSON.parse(document.getElementById('importText').value);save();alert('Progress imported.');}catch(e){alert('Invalid JSON.');}}
+function resetProgress(){if(confirm('Reset all progress in this browser?')){state={answered:{},marked:{},history:[]};save();}}
+init();
+</script>
+</body>
+</html>
