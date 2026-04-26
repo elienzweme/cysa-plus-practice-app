@@ -20,8 +20,8 @@ A browser-based practice app designed to help prepare for the CompTIA CySA+ cert
 
 ## 🌐 Live App
 
-👉 https://YOUR-USERNAME.github.io/cysa-plus-practice-app/
-
+👉 https://github.com/elienzweme/cysa-plus-practice-app/blob/main/index.html
+  
 ## 🖥️ How to Run Locally
 
 1. Download the repository
